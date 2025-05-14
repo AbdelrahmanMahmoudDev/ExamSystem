@@ -1,5 +1,6 @@
 using ExamSystem.DAL.Context;
 using ExamSystem.DAL.Identity;
+using ExamSystem.DAL.Repository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,6 +20,8 @@ namespace ExamSystem.App
             });
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
                             .AddEntityFrameworkStores<MainContext>();
+
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             var app = builder.Build();
 
