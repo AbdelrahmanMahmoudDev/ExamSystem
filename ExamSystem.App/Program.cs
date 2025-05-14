@@ -1,3 +1,8 @@
+using ExamSystem.DAL.Context;
+using ExamSystem.DAL.Identity;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+
 namespace ExamSystem.App
 {
     public class Program
@@ -8,6 +13,12 @@ namespace ExamSystem.App
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+            builder.Services.AddDbContext<MainContext>(options =>
+            {
+                options.UseSqlServer(builder.Configuration.GetConnectionString("cs"));
+            });
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+                            .AddEntityFrameworkStores<MainContext>();
 
             var app = builder.Build();
 
