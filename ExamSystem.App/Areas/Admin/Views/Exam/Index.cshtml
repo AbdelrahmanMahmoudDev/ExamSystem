@@ -1,26 +1,63 @@
-﻿@model ExamViewModel
-<!-- Button trigger modal -->
-<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModalCenter">
-	Create Exam
-</button>
+﻿@model ExamListViewModel
 
-<!-- Modal -->
-<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered" role="document">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
+<div class="container">
+	<div class="row">
+		<div class="col">
+			<!-- Button trigger modal -->
+			<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModalCenter">
+				Create Exam
+			</button>
+		</div>
+	</div>
+	<!-- End button trigger modal -->
+	<!-- Start Modal -->
+	<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
+				</div>
+				<div class="modal-body">
+					<form method="post">
+						@Html.AntiForgeryToken()
+						@await Html.PartialAsync("_ExamCreateFormPartial", Model.ExamViewModel)
+					</form>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+					<button type="submit" id="btnSubmit" class="btn btn-primary">Save</button>
+				</div>
 			</div>
-			<div class="modal-body">
-				<form method="post">
-					@Html.AntiForgeryToken()
-					@await Html.PartialAsync("_ExamCreateFormPartial", Model)
-				</form>
-			</div>
-			<div class="modal-footer">
-				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-				<button type="submit" id="btnSubmit" class="btn btn-primary">Create</button>
-			</div>
+		</div>
+	</div>
+	<!-- End Modal -->
+	<div class="row">
+		<div class="col">
+			<table class="table table-striped">
+				<thead>
+					<tr>
+						<th scope="col">#</th>
+						<th scope="col">Title</th>
+						<th scope="col"></th>
+						<th scope="col"></th>
+					</tr>
+				</thead>
+				<tbody class="table-body">
+					@foreach (var element in Model.ExamViewModelList)
+					{
+						<tr>
+							<td>@element.Id</td>
+							<td>@element.Title</td>
+							<td>
+								<a type="button" href="#" data-bs-toggle="modal" data-bs-target="#exampleModalCenter" class="alert-link btn-edit text-decoration-none" data-id="@element.Id">Edit</a>
+							</td>
+							<td>
+								<a type="button" href="#" class="alert-link text-decoration-none btn-delete" data-id="@element.Id">Delete</a>
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
 		</div>
 	</div>
 </div>
@@ -29,6 +66,128 @@
 {
 	<script>
 		document.addEventListener("DOMContentLoaded", () => {
+			const setupEditBtns = () => {
+				document.querySelectorAll(".btn-edit").forEach(btn => {
+					btn.addEventListener("click", () => {
+						fetch(`/GetExamAjax/${btn.dataset.id}`, {
+							method: "GET",
+						   headers: {
+							   "Content-Type": "application/json",
+						   },
+					   })
+					   .then(response => {
+						   if(!response.ok) {
+							   throw new Error("Failed to fetch exam data");
+						   }
+						   return response.json();
+					   })
+					   .then(data => {
+						   document.getElementById("Id").value= data.id;
+						   document.getElementById("Title").value = data.title;
+
+
+					   })
+					   .catch(error => console.error("error posting data: ", error));
+					});
+				});
+			};
+			const setupDeleteBtns = () => {
+				document.querySelectorAll(".btn-delete").forEach(btn => {
+					btn.addEventListener("click", () => {
+						fetch(`/DeleteExamAjax/${btn.dataset.id}`, {
+						   method: "GET",
+						   headers: {
+							   "Content-Type": "application/json",
+						   },
+					   })
+					   .then(response => {
+						   if(!response.ok) {
+							   throw new Error("Failed to fetch exam data");
+						   }
+						   return response.json();
+					   })
+					   .then(() => {
+							fetch(`/GetAllExamsAjax/`, {
+								method: "GET",
+								headers: {
+									"Content-Type": "application/json"
+								},
+					   })
+							.then(response => {
+								if(!response.ok) {
+									return response.json()
+										   .then(errorData => {
+												throw new Error(errorData.message) || "Failed to update table"});
+						   }
+						   return response.json();
+					   })
+					   .then(exams => {
+						   const tBody = document.querySelector(".table-body");
+						   tBody.innerHTML = null;
+						   exams.forEach(exam => {
+							   const row = document.createElement("tr");
+							   row.innerHTML =
+							   `
+									<td>${exam.id}</td>
+									<td>${exam.title}</td>
+									<td>
+										<a type="button" href="#" data-bs-toggle="modal" data-bs-target="#exampleModalCenter" class="alert-link btn-edit text-decoration-none" data-id="${exam.id}">Edit</a>
+									</td>
+									<td>
+										<a type="button" href="#" class="alert-link text-decoration-none btn-delete" data-id="${exam.id}">Delete</a>
+									</td>
+							   `;
+							   tBody.appendChild(row);
+						   });
+						   document.querySelectorAll(".btn-edit").forEach(btn => {
+								btn.addEventListener("click", () => {
+									fetch(`/GetExamAjax/${btn.dataset.id}`, {
+										method: "GET",
+										headers: {
+											"Content-Type": "application/json",
+										},
+								})
+								.then(response => {
+									   if(!response.ok) {
+										   throw new Error("Failed to fetch exam data");
+									   }
+									   return response.json();
+								})
+								.then(data => {
+									   document.getElementById("Id").value= data.id;
+									   document.getElementById("Title").value = data.title;
+								})
+								.catch(error => console.error("error posting data: ", error));
+								});
+							});
+
+							document.querySelectorAll(".btn-delete").forEach(btn => {
+								btn.addEventListener("click", () => {
+								fetch(`/DeleteExamAjax/${btn.dataset.id}`, {
+										method: "GET",
+										headers: {
+											"Content-Type": "application/json",
+										},
+								})
+								.then(response => {
+									   if(!response.ok) {
+										   throw new Error("Failed to fetch exam data");
+									   }
+									   return response.json();
+								})
+								.catch(error => console.error("error posting data: ", error));
+								});
+							});
+					   })
+				   })
+				   .catch(error => console.error("error posting data: ", error));
+				});
+			});
+			};
+
+			setupEditBtns();
+			setupDeleteBtns();
+
 		   document.getElementById("btnSubmit").addEventListener("click", e => {
 			   e.preventDefault();
 			   const examId = document.getElementById("Id").value;
@@ -54,6 +213,45 @@
 						   return response.json().then(errorData => {throw new Error(errorData.message) || "Failed to update exam"});
 					   }
 					   return response.json();
+				   })
+				   .then(() => {
+					   fetch(`/GetAllExamsAjax/`, {
+						   method: "GET",
+						   headers: {
+							   "Content-Type": "application/json"
+						   },
+					   })
+					   .then(response => {
+						   if(!response.ok) {
+							   return response.json().then(errorData => {
+								   throw new Error(errorData.message) || "Failed to update table"});
+						   }
+						   return response.json();
+					   })
+					   .then(exams => {
+						   const tBody = document.querySelector(".table-body");
+						   console.log(tBody);
+						   tBody.innerHTML = null;
+						   exams.forEach(exam => {
+							   console.log(exam);
+							   const row = document.createElement("tr");
+							   row.innerHTML =
+							   `
+									<td>${exam.id}</td>
+									<td>${exam.title}</td>
+									<td>
+										<a type="button" href="#" data-bs-toggle="modal" data-bs-target="#exampleModalCenter" class="alert-link btn-edit text-decoration-none" data-id="${exam.id}">Edit</a>
+									</td>
+									<td>
+										<a type="button" href="#" class="alert-link text-decoration-none btn-delete" data-id="${exam.id}">Delete</a>
+									</td>
+							   `;
+							   tBody.appendChild(row);
+						   });
+
+						   setupEditBtns();
+						   setupDeleteBtns();
+					   })
 				   })
 				   .catch(error => console.error("error posting data: ", error));
 
