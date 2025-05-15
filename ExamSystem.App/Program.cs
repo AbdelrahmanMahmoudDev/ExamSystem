@@ -18,6 +18,8 @@ namespace ExamSystem.App
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("cs"));
             });
+
+
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
                             .AddEntityFrameworkStores<MainContext>();
 
@@ -32,12 +34,13 @@ namespace ExamSystem.App
             }
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapStaticAssets();
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Home}/{action=Index}/{id?}")
+                pattern: "{controller=Account}/{action=Index}/{id?}")
                 .WithStaticAssets();
 
             app.Run();
