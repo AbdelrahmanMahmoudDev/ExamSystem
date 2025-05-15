@@ -7,10 +7,10 @@ namespace ExamSystem.DAL.Context
 {
     public class MainContext : IdentityDbContext<ApplicationUser>
     {
-        public virtual DbSet<TbExams> Exams { get; set; }
-        public virtual DbSet<TbUserExams> UserExams { get; set; }
-        public virtual DbSet<TbQuestions> Questions { get; set; }
-        public virtual DbSet<TbUserAnswers> UserAnswers { get; set; }
+        public virtual DbSet<TbExams> TbExams { get; set; }
+        public virtual DbSet<TbUserExams> TbUserExams { get; set; }
+        public virtual DbSet<TbQuestions> TbQuestions { get; set; }
+        public virtual DbSet<TbUserAnswers> TbUserAnswers { get; set; }
 
         public MainContext() : base() { }
         public MainContext(DbContextOptions options) : base(options) { Database.EnsureCreated(); }

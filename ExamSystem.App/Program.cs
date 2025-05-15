@@ -1,3 +1,4 @@
+using ExamSystem.BL;
 using ExamSystem.DAL.Context;
 using ExamSystem.DAL.Identity;
 using ExamSystem.DAL.Repository;
@@ -24,6 +25,7 @@ namespace ExamSystem.App
                             .AddEntityFrameworkStores<MainContext>();
 
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddScoped<IExamService, ExamService>();
 
             var app = builder.Build();
 
@@ -38,6 +40,12 @@ namespace ExamSystem.App
             app.UseAuthorization();
 
             app.MapStaticAssets();
+
+            app.MapControllerRoute(
+                 name: "areas",
+                  pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
+                );
+
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Account}/{action=Index}/{id?}")

@@ -1,0 +1,66 @@
+﻿@model ExamViewModel
+<!-- Button trigger modal -->
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModalCenter">
+	Create Exam
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
+			</div>
+			<div class="modal-body">
+				<form method="post">
+					@Html.AntiForgeryToken()
+					@await Html.PartialAsync("_ExamCreateFormPartial", Model)
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+				<button type="submit" id="btnSubmit" class="btn btn-primary">Create</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section Scripts
+{
+	<script>
+		document.addEventListener("DOMContentLoaded", () => {
+		   document.getElementById("btnSubmit").addEventListener("click", e => {
+			   e.preventDefault();
+			   const examId = document.getElementById("Id").value;
+			   const examTitle = document.getElementById("Title").value;
+
+				   const payload = {
+					   Id: examId ? parseInt(examId) : null,
+					   Title: examTitle,
+				   };
+
+				   const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+				   fetch('@Url.Action("EditAjax", "Exam")', {
+					   method: "POST",
+					   headers: {
+						   "Content-Type": "application/json",
+						   "RequestVerificationToken": token
+					   },
+					   body: JSON.stringify(payload)
+				   })
+				   .then(response => {
+					   if(!response.ok) {
+						   return response.json().then(errorData => {throw new Error(errorData.message) || "Failed to update exam"});
+					   }
+					   return response.json();
+				   })
+				   .catch(error => console.error("error posting data: ", error));
+
+		   });
+		});
+	</script>
+
+	<partial name="_ValidationScriptsPartial" />
+
+}

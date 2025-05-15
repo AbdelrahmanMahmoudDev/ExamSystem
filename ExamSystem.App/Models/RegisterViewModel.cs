@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace ExamSystem.App.Models
 {
@@ -17,6 +18,7 @@ namespace ExamSystem.App.Models
         public bool IsRememberMe { get; set; }
         [Required(ErrorMessage = "* This field is required.")]
         public string RoleName { get; set; } = null!;
+        [ValidateNever]
         public IQueryable<IdentityRole> Roles { get; set; } = null!;
     }
 }

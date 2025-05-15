@@ -45,12 +45,7 @@ namespace ExamSystem.App.Controllers
 
             if (userCreationResult.Succeeded)
             {
-                IdentityRole role = new IdentityRole()
-                {
-                    Name = userViewModel.RoleName,
-                };
-
-                IdentityResult OpResult = await _roleManager.CreateAsync(role);
+                IdentityResult OpResult = await _userManager.AddToRoleAsync(applicationUser, userViewModel.RoleName);
 
                 if (!OpResult.Succeeded)
                 {

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ExamSystem.DAL.Migrations
 {
     [DbContext(typeof(MainContext))]
-    [Migration("20250514120647_init")]
+    [Migration("20250515061851_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -111,7 +111,14 @@ namespace ExamSystem.DAL.Migrations
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("TbExams");
                 });
@@ -220,7 +227,14 @@ namespace ExamSystem.DAL.Migrations
                     b.Property<int>("TotalQuestions")
                         .HasColumnType("int");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("TbUserExams");
                 });
@@ -376,6 +390,15 @@ namespace ExamSystem.DAL.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("ExamSystem.Domains.TbExams", b =>
+                {
+                    b.HasOne("ExamSystem.DAL.Identity.ApplicationUser", null)
+                        .WithMany("Exams")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("ExamSystem.Domains.TbQuestions", b =>
                 {
                     b.HasOne("ExamSystem.Domains.TbExams", "Exam")
@@ -404,6 +427,15 @@ namespace ExamSystem.DAL.Migrations
                     b.Navigation("Question");
 
                     b.Navigation("UserExam");
+                });
+
+            modelBuilder.Entity("ExamSystem.Domains.TbUserExams", b =>
+                {
+                    b.HasOne("ExamSystem.DAL.Identity.ApplicationUser", null)
+                        .WithMany("UserExams")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -455,6 +487,13 @@ namespace ExamSystem.DAL.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("ExamSystem.DAL.Identity.ApplicationUser", b =>
+                {
+                    b.Navigation("Exams");
+
+                    b.Navigation("UserExams");
                 });
 
             modelBuilder.Entity("ExamSystem.Domains.TbExams", b =>

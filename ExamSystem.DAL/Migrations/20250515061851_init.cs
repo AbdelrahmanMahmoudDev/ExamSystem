@@ -51,38 +51,6 @@ namespace ExamSystem.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "TbExams",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TbExams", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "TbUserExams",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    SubmitDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    PassStatus = table.Column<bool>(type: "bit", nullable: false),
-                    TotalQuestions = table.Column<int>(type: "int", nullable: false),
-                    CorrectAnswers = table.Column<int>(type: "int", nullable: false),
-                    Score = table.Column<double>(type: "float", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TbUserExams", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -189,6 +157,52 @@ namespace ExamSystem.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "TbExams",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TbExams", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TbExams_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TbUserExams",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    SubmitDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    PassStatus = table.Column<bool>(type: "bit", nullable: false),
+                    TotalQuestions = table.Column<int>(type: "int", nullable: false),
+                    CorrectAnswers = table.Column<int>(type: "int", nullable: false),
+                    Score = table.Column<double>(type: "float", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TbUserExams", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TbUserExams_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "TbQuestions",
                 columns: table => new
                 {
@@ -282,6 +296,11 @@ namespace ExamSystem.DAL.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_TbExams_UserId",
+                table: "TbExams",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_TbQuestions_ExamId",
                 table: "TbQuestions",
                 column: "ExamId");
@@ -295,6 +314,11 @@ namespace ExamSystem.DAL.Migrations
                 name: "IX_TbUserAnswers_UserExamId",
                 table: "TbUserAnswers",
                 column: "UserExamId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_TbUserExams_UserId",
+                table: "TbUserExams",
+                column: "UserId");
         }
 
         /// <inheritdoc />
@@ -322,9 +346,6 @@ namespace ExamSystem.DAL.Migrations
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
-
-            migrationBuilder.DropTable(
                 name: "TbQuestions");
 
             migrationBuilder.DropTable(
@@ -332,6 +353,9 @@ namespace ExamSystem.DAL.Migrations
 
             migrationBuilder.DropTable(
                 name: "TbExams");
+
+            migrationBuilder.DropTable(
+                name: "AspNetUsers");
         }
     }
 }
