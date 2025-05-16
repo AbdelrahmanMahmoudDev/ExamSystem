@@ -28,7 +28,7 @@ namespace ExamSystem.App.Controllers
             return View(registerViewModel);
         }
 
-        [HttpPost]
+        [HttpPost]  
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel userViewModel)
         {

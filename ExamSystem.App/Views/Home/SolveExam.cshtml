@@ -1,0 +1,204 @@
+﻿@model ExamViewModel
+
+<div class="container d-flex justify-content-center align-items-center">
+	<div class="row w-100">
+		<!-- Exam Title -->
+		<div class="col-md-12 d-flex justify-content-center mb-4">
+			<h1 class="exam-title text-center">@Model.Title</h1>
+		</div>
+
+		<div class="row justify-content-center">
+			<div class="col-md-10 col-lg-8">
+				<div class="tab-content shadow p-4 rounded bg-light">
+					<div class="form-container tab-pane fade show active" id="pills-login" role="tabpanel" aria-labelledby="tab-login">
+						<form class="exam-form" method="post" >
+							@Html.AntiForgeryToken()
+							<input type="hidden" asp-for="Id" />
+							<input type="hidden" asp-for="Title" />
+
+							<!-- Questions Container -->
+							<div class="question-container">
+								@for (int i = 0; i < Model.Questions.Count; i++)
+								{
+									<div class="question-row mb-4 p-3 border rounded bg-white shadow-sm" data-index="@i">
+										<input type="hidden" asp-for="@Model.Questions[i].QuestionId" />
+										<input type="hidden" asp-for="@Model.Questions[i].CorrectChoice" />
+										<input type="hidden" asp-for="@Model.Questions[i].UserChoice" />
+										<div class="mb-3">
+											<h3 class="question-title">@(i + 1). @Model.Questions[i].QuestionTitle</h3>
+										</div>
+										<div class="form-check mb-2">
+											<input checked asp-for="Questions[i].UserChoice" class="form-check-input" type="radio" value="1" id="q@(i)_choice1">
+											<label class="form-check-label choice-label" for="q@(i)_choice1">@Model.Questions[i].FirstChoice</label>
+										</div>
+										<div class="form-check mb-2">
+											<input asp-for="Questions[i].UserChoice" class="form-check-input" type="radio" value="2" id="q@(i)_choice2">
+											<label class="form-check-label choice-label" for="q@(i)_choice2">@Model.Questions[i].SecondChoice</label>
+										</div>
+										<div class="form-check mb-2">
+											<input asp-for="Questions[i].UserChoice" class="form-check-input" type="radio" value="3" id="q@(i)_choice3">
+											<label class="form-check-label choice-label" for="q@(i)_choice3">@Model.Questions[i].ThirdChoice</label>
+										</div>
+										<div class="form-check mb-2">
+											<input asp-for="Questions[i].UserChoice" class="form-check-input" type="radio" value="4" id="q@(i)_choice4">
+											<label class="form-check-label choice-label" for="q@(i)_choice4">@Model.Questions[i].FourthChoice</label>
+										</div>
+									</div>
+								}
+							</div>
+
+							<!-- Submit Button -->
+							<div class="text-center">
+								<button type="submit" class="btn btn-primary btn-lg submit-exam-btn">Submit Exam</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<style>
+	/* Custom styles for the exam view */
+	.exam-title {
+		font-size: 2.5rem;
+		font-weight: 700;
+		color: #2c3e50;
+		text-transform: uppercase;
+		letter-spacing: 1px;
+	}
+
+	.question-container {
+		max-width: 100%;
+	}
+
+	.question-row {
+		transition: all 0.3s ease;
+	}
+
+		.question-row:hover {
+			transform: translateY(-5px);
+			box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1) !important;
+		}
+
+	.question-title {
+		font-size: 1.5rem;
+		font-weight: 600;
+		color: #34495e;
+		margin-bottom: 1rem;
+	}
+
+	.form-check-input {
+		cursor: pointer;
+		width: 1.2rem;
+		height: 1.2rem;
+		margin-right: 0.5rem;
+	}
+
+	.form-check-label {
+		font-size: 1.1rem;
+		color: #555;
+		transition: color 0.3s ease;
+	}
+
+	.form-check-input:checked + .form-check-label {
+		color: #007bff;
+		font-weight: 500;
+	}
+
+	.form-check:hover .form-check-label {
+		color: #007bff;
+	}
+
+	.submit-exam-btn {
+		padding: 0.75rem 2rem;
+		font-size: 1.2rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		border-radius: 25px;
+		transition: background-color 0.3s ease, transform 0.2s ease;
+	}
+
+		.submit-exam-btn:hover {
+			background-color: #0056b3;
+			transform: scale(1.05);
+		}
+</style>
+
+@section Scripts
+{
+	<script>
+		document.addEventListener("DOMContentLoaded", () => {
+			async function submitExam() {
+				const examId = document.getElementById("Id").value;
+				const examTitle = document.getElementById("Title").value;
+				const questions = Array.from(document.querySelectorAll(".question-row")).map(row => {
+					const index = row.getAttribute("data-index");
+					const QuestionId = document.getElementById(`Questions_${index}__QuestionId`).value;
+					const CorrectChoice = document.getElementById(`Questions_${index}__CorrectChoice`).value;
+					const UserChoice = document.querySelector(`input[name="Questions[${index}].UserChoice"]:checked`).value;
+
+					return {
+						QuestionId: QuestionId ? parseInt(QuestionId) : null,
+							CorrectChoice: CorrectChoice,
+							UserChoice: UserChoice,
+					}
+				});
+
+				const antiForgeryToken = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+
+				const payload = {
+				ExamId: examId ? parseInt(examId) : null,
+				Questions: questions,
+				}
+
+				const requestHeaders = new Headers({
+					"Content-Type": "application/json",
+					"RequestVerificationToken": antiForgeryToken,
+					"X-Requested-With": "XMLHttpRequest"
+				});
+
+				let examAssesment = {}
+
+				try{
+					const response = await fetch("@Url.Action("SubmitExamAjax", "Home")", {
+						method: "POST",
+						headers: requestHeaders,
+						body: JSON.stringify(payload),
+					});
+					if (!response.ok) {
+						throw new Error("Failed to submit exam");
+					}
+					const result = await response.json();
+					console.log(`$Submission successful: ${result}`);
+					examAssesment = result.payload;
+					console.log(examAssesment);
+				} catch (error) {
+					console.error("Error submitting exam:", error);
+				}
+
+				if (examAssesment) {
+					const resultContainer = document.createElement("div");
+					resultContainer.className = examAssesment.score >= 60 ? "alert alert-success mt-4" : "alert alert-danger mt-4";
+					resultContainer.innerHTML = `
+						<h3>Exam Assessment</h3>
+						<p><strong>Score:</strong> ${examAssesment.score}%</p>
+						<p><strong>Correct Answers:</strong> ${examAssesment.correctAnswers}</p>
+						<p><strong>Incorrect Answers:</strong> ${examAssesment.inCorrectAnswers}</p>
+						<p><strong>Status:</strong> ${examAssesment.score >= 60 ? "Passed!" : "Failed" }</p>
+						<a class="btn btn-primary" href="/Home/Index">Go back</a>
+					`;
+					document.querySelector(".form-container").innerHTML = "";
+					document.querySelector(".form-container").appendChild(resultContainer);
+				}
+
+			};
+			document.querySelector(".exam-form").addEventListener("submit", (e) => {
+				e.preventDefault();
+				submitExam();
+			});
+			});
+	</script>
+}

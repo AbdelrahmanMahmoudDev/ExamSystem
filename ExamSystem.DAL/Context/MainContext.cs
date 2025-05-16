@@ -10,7 +10,6 @@ namespace ExamSystem.DAL.Context
         public virtual DbSet<TbExams> TbExams { get; set; }
         public virtual DbSet<TbUserExams> TbUserExams { get; set; }
         public virtual DbSet<TbQuestions> TbQuestions { get; set; }
-        public virtual DbSet<TbUserAnswers> TbUserAnswers { get; set; }
 
         public MainContext() : base() { }
         public MainContext(DbContextOptions options) : base(options) { Database.EnsureCreated(); }
@@ -43,19 +42,11 @@ namespace ExamSystem.DAL.Context
             builder.Entity<TbUserExams>(e =>
             {
                 e.HasKey(e => e.Id);
-            });
 
-            builder.Entity<TbUserAnswers>(e =>
-            {
-                e.HasKey(e => e.Id);
-
-                e.HasOne(e => e.Question)
-                 .WithMany(e => e.UserAnswers)
-                 .HasForeignKey(e => e.QuestionId);
-
-                e.HasOne(e => e.UserExam)
-                 .WithMany(e => e.UserAnswers)
-                 .HasForeignKey(e => e.UserExamId);
+                e.HasOne(e => e.Exam)
+                 .WithMany(e => e.UserExams)
+                 .HasForeignKey(e => e.ExamId)
+                 .OnDelete(DeleteBehavior.Cascade);
             });
 
             builder.Entity<ApplicationUser>(e =>

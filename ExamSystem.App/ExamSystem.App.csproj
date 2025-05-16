@@ -19,9 +19,4 @@
     <ProjectReference Include="..\ExamSystem.DAL\ExamSystem.DAL.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Areas\Admin\Data\" />
-    <Folder Include="Areas\DTOs\" />
-  </ItemGroup>
-
 </Project>

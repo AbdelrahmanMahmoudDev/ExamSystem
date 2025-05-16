@@ -27,6 +27,7 @@ namespace ExamSystem.App
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IExamService, ExamService>();
             builder.Services.AddScoped<IQuestionService, QuestionService>();
+            builder.Services.AddScoped<IUserExamService, UserExamService>();
 
             var app = builder.Build();
 

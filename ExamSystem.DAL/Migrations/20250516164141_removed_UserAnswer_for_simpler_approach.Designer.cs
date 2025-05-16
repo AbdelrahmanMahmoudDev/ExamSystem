@@ -4,6 +4,7 @@ using ExamSystem.DAL.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ExamSystem.DAL.Migrations
 {
     [DbContext(typeof(MainContext))]
-    partial class MainContextModelSnapshot : ModelSnapshot
+    [Migration("20250516164141_removed_UserAnswer_for_simpler_approach")]
+    partial class removed_UserAnswer_for_simpler_approach
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -185,14 +188,14 @@ namespace ExamSystem.DAL.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("ExamId")
-                        .HasColumnType("int");
-
                     b.Property<bool>("PassStatus")
                         .HasColumnType("bit");
 
                     b.Property<double>("Score")
                         .HasColumnType("float");
+
+                    b.Property<DateTime>("SubmitDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("TotalQuestions")
                         .HasColumnType("int");
@@ -202,8 +205,6 @@ namespace ExamSystem.DAL.Migrations
                         .HasColumnType("nvarchar(300)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ExamId");
 
                     b.HasIndex("UserId");
 
@@ -382,18 +383,10 @@ namespace ExamSystem.DAL.Migrations
 
             modelBuilder.Entity("ExamSystem.Domains.TbUserExams", b =>
                 {
-                    b.HasOne("ExamSystem.Domains.TbExams", "Exam")
-                        .WithMany("UserExams")
-                        .HasForeignKey("ExamId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("ExamSystem.DAL.Identity.ApplicationUser", null)
                         .WithMany("UserExams")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("Exam");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -457,8 +450,6 @@ namespace ExamSystem.DAL.Migrations
             modelBuilder.Entity("ExamSystem.Domains.TbExams", b =>
                 {
                     b.Navigation("Questions");
-
-                    b.Navigation("UserExams");
                 });
 #pragma warning restore 612, 618
         }

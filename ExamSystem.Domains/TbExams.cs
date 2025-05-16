@@ -4,7 +4,9 @@
     {
         public TbExams()
         {
+        
             Questions = new List<TbQuestions>();
+            UserExams = new List<TbUserExams>();
         }
 
         public int Id { get; set; }
@@ -12,5 +14,6 @@
         public string Title { get; set; } = null!;
         public string? UserId { get; set; } = null!;
         public ICollection<TbQuestions> Questions { get; set; }
+        public ICollection<TbUserExams> UserExams { get; set; } 
     }
 }

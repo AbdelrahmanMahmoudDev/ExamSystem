@@ -10,7 +10,6 @@ namespace ExamSystem.DAL.Repository
         private IDbContextTransaction _transaction;
         public IRepository<TbExams> Exams { get; private set; }
         public IRepository<TbQuestions> Questions { get; private set; }
-        public IRepository<TbUserAnswers> UserAnswers { get; private set; }
         public IRepository<TbUserExams> UserExams { get; private set; }
 
         public UnitOfWork(MainContext context)
@@ -18,7 +17,6 @@ namespace ExamSystem.DAL.Repository
             _context = context;
             Exams = new GenericRepository<TbExams>(context);
             Questions = new GenericRepository<TbQuestions>(context);
-            UserAnswers = new GenericRepository<TbUserAnswers>(context);
             UserExams = new GenericRepository<TbUserExams>(context);
         }
 

@@ -22,6 +22,7 @@ namespace ExamSystem.App.Areas.Admin.Models
         [Required(ErrorMessage = "* This field is required.")]
         [StringLength(50)]
         public string FourthChoice { get; set; } = null!;
+        public int UserChoice { get; set; }
         public int ExamId { get; set; }
     }
 }

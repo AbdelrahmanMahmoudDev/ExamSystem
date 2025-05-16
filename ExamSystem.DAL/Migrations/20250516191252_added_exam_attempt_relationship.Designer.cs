@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ExamSystem.DAL.Migrations
 {
     [DbContext(typeof(MainContext))]
-    [Migration("20250516082015_init")]
-    partial class init
+    [Migration("20250516191252_added_exam_attempt_relationship")]
+    partial class added_exam_attempt_relationship
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -164,40 +164,14 @@ namespace ExamSystem.DAL.Migrations
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
 
+                    b.Property<int>("UserChoice")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ExamId");
 
                     b.ToTable("TbQuestions");
-                });
-
-            modelBuilder.Entity("ExamSystem.Domains.TbUserAnswers", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("IsCorrect")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("QuestionId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SelectedAnswer")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserExamId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("QuestionId");
-
-                    b.HasIndex("UserExamId");
-
-                    b.ToTable("TbUserAnswers");
                 });
 
             modelBuilder.Entity("ExamSystem.Domains.TbUserExams", b =>
@@ -214,14 +188,14 @@ namespace ExamSystem.DAL.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("ExamId")
+                        .HasColumnType("int");
+
                     b.Property<bool>("PassStatus")
                         .HasColumnType("bit");
 
                     b.Property<double>("Score")
                         .HasColumnType("float");
-
-                    b.Property<DateTime>("SubmitDate")
-                        .HasColumnType("datetime2");
 
                     b.Property<int>("TotalQuestions")
                         .HasColumnType("int");
@@ -231,6 +205,8 @@ namespace ExamSystem.DAL.Migrations
                         .HasColumnType("nvarchar(300)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ExamId");
 
                     b.HasIndex("UserId");
 
@@ -407,31 +383,20 @@ namespace ExamSystem.DAL.Migrations
                     b.Navigation("Exam");
                 });
 
-            modelBuilder.Entity("ExamSystem.Domains.TbUserAnswers", b =>
-                {
-                    b.HasOne("ExamSystem.Domains.TbQuestions", "Question")
-                        .WithMany("UserAnswers")
-                        .HasForeignKey("QuestionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("ExamSystem.Domains.TbUserExams", "UserExam")
-                        .WithMany("UserAnswers")
-                        .HasForeignKey("UserExamId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Question");
-
-                    b.Navigation("UserExam");
-                });
-
             modelBuilder.Entity("ExamSystem.Domains.TbUserExams", b =>
                 {
+                    b.HasOne("ExamSystem.Domains.TbExams", "Exam")
+                        .WithMany("UserExams")
+                        .HasForeignKey("ExamId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("ExamSystem.DAL.Identity.ApplicationUser", null)
                         .WithMany("UserExams")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Exam");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -495,16 +460,8 @@ namespace ExamSystem.DAL.Migrations
             modelBuilder.Entity("ExamSystem.Domains.TbExams", b =>
                 {
                     b.Navigation("Questions");
-                });
 
-            modelBuilder.Entity("ExamSystem.Domains.TbQuestions", b =>
-                {
-                    b.Navigation("UserAnswers");
-                });
-
-            modelBuilder.Entity("ExamSystem.Domains.TbUserExams", b =>
-                {
-                    b.Navigation("UserAnswers");
+                    b.Navigation("UserExams");
                 });
 #pragma warning restore 612, 618
         }
