@@ -1,117 +1,169 @@
 ﻿@model ExamViewModel
 
 <form method="post" asp-area="Admin" asp-controller="Exam" asp-action="Save">
-    @Html.AntiForgeryToken()
-    <input type="hidden" asp-for="Id" />
+	@Html.AntiForgeryToken()
+	<input type="hidden" asp-for="Id" />
 
-    <div class="mb-3">
-        <label asp-for="Title" class="form-label">Title</label>
-        <input asp-for="Title" type="text" class="form-control" />
-        <span asp-validation-for="Title" style="color: red;"></span>
-    </div>
+	<div class="mb-3">
+		<label asp-for="Title" class="form-label">Title</label>
+		<input asp-for="Title" type="text" class="form-control" />
+		<span asp-validation-for="Title" style="color: red;"></span>
+	</div>
 
-    <div class="question-container">
-        @for (int i = 0; i < Model.Questions.Count; i++)
-        {
-            <div class="question-row mb-3" data-index="@i">
-                <input type="hidden" asp-for="@Model.Questions[i].QuestionId" />
-                <div class="mb-3">
-                    <label asp-for="@Model.Questions[i].QuestionTitle" class="form-label">Question Title</label>
-                    <input asp-for="@Model.Questions[i].QuestionTitle" type="text" class="form-control" />
-                    <span asp-validation-for="@Model.Questions[i].QuestionTitle" style="color: red;"></span>
-                </div>
-                <div class="mb-3">
-                    <label asp-for="@Model.Questions[i].FirstChoice" class="form-label">First Choice</label>
-                    <input asp-for="@Model.Questions[i].FirstChoice" type="text" class="form-control" />
-                    <span asp-validation-for="@Model.Questions[i].FirstChoice" style="color: red;"></span>
-                </div>
-                <!-- Other choice fields... -->
-                <label class="form-label">Correct Choice</label>
-                <div class="form-check">
-                    <input asp-for="@Model.Questions[i].CorrectChoice" class="form-check-input" type="radio" value="1" checked>
-                    <label class="form-check-label">First Choice</label>
-                </div>
-                <!-- Other radio options... -->
-                <button type="button" class="btn btn-danger btn-remove-question" data-question-id="@Model.Questions[i].QuestionId">Remove</button>
-                <hr />
-            </div>
-        }
-    </div>
+	<div class="question-container">
+		@for (int i = 0; i < Model.Questions.Count; i++)
+		{
+			<div class="question-row mb-3" data-index="@i">
+				<input type="hidden" asp-for="@Model.Questions[i].QuestionId" />
+				<div class="mb-3">
+					<label asp-for="@Model.Questions[i].QuestionTitle" class="form-label">Question Title</label>
+					<input asp-for="@Model.Questions[i].QuestionTitle" type="text" class="form-control" />
+					<span asp-validation-for="@Model.Questions[i].QuestionTitle" style="color: red;"></span>
+				</div>
+				<div class="mb-3">
+					<label asp-for="@Model.Questions[i].FirstChoice" class="form-label">First Choice</label>
+					<input asp-for="@Model.Questions[i].FirstChoice" type="text" class="form-control" />
+					<span asp-validation-for="@Model.Questions[i].FirstChoice" style="color: red;"></span>
+				</div>
+				<div class="mb-3">
+					<label asp-for="@Model.Questions[i].SecondChoice" class="form-label">Second Choice</label>
+					<input asp-for="@Model.Questions[i].SecondChoice" type="text" class="form-control" />
+					<span asp-validation-for="@Model.Questions[i].SecondChoice" style="color: red;"></span>
+				</div>
+				<div class="mb-3">
+					<label asp-for="@Model.Questions[i].ThirdChoice" class="form-label">Third Choice</label>
+					<input asp-for="@Model.Questions[i].ThirdChoice" type="text" class="form-control" />
+					<span asp-validation-for="@Model.Questions[i].ThirdChoice" style="color: red;"></span>
+				</div>
+				<div class="mb-3">
+					<label asp-for="@Model.Questions[i].FourthChoice" class="form-label">Fourth Choice</label>
+					<input asp-for="@Model.Questions[i].FourthChoice" type="text" class="form-control" />
+					<span asp-validation-for="@Model.Questions[i].FourthChoice" style="color: red;"></span>
+				</div>
+				<label class="form-label">Correct Choice</label>
+				<div class="form-check">
+					<input asp-for="@Model.Questions[i].CorrectChoice" class="form-check-input" type="radio" value="1">
+					<label class="form-check-label">First Choice</label>
+				</div>
+				<div class="form-check">
+					<input asp-for="@Model.Questions[i].CorrectChoice" class="form-check-input" type="radio" value="2">
+					<label class="form-check-label">Second Choice</label>
+				</div>
+				<div class="form-check">
+					<input asp-for="@Model.Questions[i].CorrectChoice" class="form-check-input" type="radio" value="3">
+					<label class="form-check-label">Third Choice</label>
+				</div>
+				<div class="form-check">
+					<input asp-for="@Model.Questions[i].CorrectChoice" class="form-check-input" type="radio" value="4">
+					<label class="form-check-label">Fourth Choice</label>
+				</div>
+				<button type="button" class="btn btn-danger btn-remove-question" data-question-id="@Model.Questions[i].QuestionId">Remove</button>
+				<hr />
+			</div>
+		}
+	</div>
 
-    <button type="button" class="btn btn-primary btn-add-question">Add Question</button>
-    <button type="submit" class="btn btn-primary">Submit</button>
+	<button type="button" class="btn btn-primary btn-add-question">Add Question</button>
+	<button type="submit" class="btn btn-primary">Submit</button>
+<div class="my-3">
+	<a asp-area="Admin" asp-controller="Exam" asp-action="Index" class="btn btn-secondary">Back</a>
+</div>
 </form>
 
-<div class="mb-3">
-    <a asp-area="Admin" asp-controller="Exam" asp-action="Index" class="btn btn-secondary">Back</a>
-</div>
 
 @section Scripts
 {
-    <partial name="_ValidationScriptsPartial" />
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const questionsContainer = document.querySelector(".question-container");
-            let questionIndex = @Model.Questions.Count;
+	<partial name="_ValidationScriptsPartial" />
+	<script>
+		document.addEventListener("DOMContentLoaded", () => {
+			const questionsContainer = document.querySelector(".question-container");
+			let questionIndex = @Model.Questions.Count;
 
-            document.querySelector(".btn-add-question").addEventListener("click", (e) => {
-                e.preventDefault();
-                const newIndex = questionIndex++;
-                const questionForm = `
-                    <div class="question-row mb-3" data-index="${newIndex}">
-                        <input type="hidden" name="Questions[${newIndex}].QuestionId" value="" />
-                        <div class="mb-3">
-                            <label class="form-label">Question Title</label>
-                            <input name="Questions[${newIndex}].QuestionTitle" type="text" class="form-control" />
-                            <span style="color: red;"></span>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">First Choice</label>
-                            <input name="Questions[${newIndex}].FirstChoice" type="text" class="form-control" />
-                            <span style="color: red;"></span>
-                        </div>
-                        <label class="form-label">Correct Choice</label>
-                        <div class="form-check">
-                            <input name="Questions[${newIndex}].CorrectChoice" class="form-check-input" type="radio" value="1" checked>
-                            <label class="form-check-label">First Choice</label>
-                        </div>
-                        <button type="button" class="btn btn-danger btn-remove-question" data-question-id="">Remove</button>
-                        <hr />
-                    </div>
-                `;
-                questionsContainer.insertAdjacentHTML("beforeend", questionForm);
+			document.querySelector(".btn-add-question").addEventListener("click", (e) => {
+				e.preventDefault();
+				const newIndex = questionIndex++;
+				const questionForm = `
+					<div class="question-row mb-3" data-index="${newIndex}">
+						<input type="hidden" name="Questions[${newIndex}].QuestionId" value="" />
+						<div class="mb-3">
+							<label class="form-label">Question Title</label>
+							<input name="Questions[${newIndex}].QuestionTitle" type="text" class="form-control" />
+							<span style="color: red;"></span>
+						</div>
+						<div class="mb-3">
+							<label class="form-label">First Choice</label>
+							<input name="Questions[${newIndex}].FirstChoice" type="text" class="form-control" />
+							<span style="color: red;"></span>
+						</div>
+						<div class="mb-3">
+							<label class="form-label">Second Choice</label>
+							<input name="Questions[${newIndex}].SecondChoice" type="text" class="form-control" />
+							<span style="color: red;"></span>
+						</div>
+						<div class="mb-3">
+							<label class="form-label">Third Choice</label>
+							<input name="Questions[${newIndex}].ThirdChoice" type="text" class="form-control" />
+							<span style="color: red;"></span>
+						</div>
+						<div class="mb-3">
+							<label class="form-label">Fourth Choice</label>
+							<input name="Questions[${newIndex}].FourthChoice" type="text" class="form-control" />
+							<span style="color: red;"></span>
+						</div>
+						<label class="form-label">Correct Choice</label>
+						<div class="form-check">
+							<input name="Questions[${newIndex}].CorrectChoice" class="form-check-input" type="radio" value="1" checked>
+							<label class="form-check-label">First Choice</label>
+						</div>
+						<div class="form-check">
+							<input name="Questions[${newIndex}].CorrectChoice" class="form-check-input" type="radio" value="2">
+							<label class="form-check-label">Second Choice</label>
+						</div>
+						<div class="form-check">
+							<input name="Questions[${newIndex}].CorrectChoice" class="form-check-input" type="radio" value="3">
+							<label class="form-check-label">Third Choice</label>
+						</div>
+						<div class="form-check">
+							<input name="Questions[${newIndex}].CorrectChoice" class="form-check-input" type="radio" value="4">
+							<label class="form-check-label">Fourth Choice</label>
+						</div>
+						<button type="button" class="btn btn-danger btn-remove-question" data-question-id="">Remove</button>
+						<hr />
+					</div>
+				`;
+				questionsContainer.insertAdjacentHTML("beforeend", questionForm);
 
-                document.querySelectorAll(".btn-remove-question").forEach(btn => {
-                    btn.removeEventListener("click", removeQuestionHandler);
-                    btn.addEventListener("click", removeQuestionHandler);
-                });
-            });
+				document.querySelectorAll(".btn-remove-question").forEach(btn => {
+					btn.removeEventListener("click", removeQuestionHandler);
+					btn.addEventListener("click", removeQuestionHandler);
+				});
+			});
 
-            const removeQuestionHandler = async (e) => {
-                e.preventDefault();
-                const row = e.target.closest(".question-row");
-                const questionId = row.querySelector("[name^='Questions']").getAttribute("data-question-id");
+			const removeQuestionHandler = async (e) => {
+				e.preventDefault();
+				const row = e.target.closest(".question-row");
+				const questionId = row.querySelector("[name^='Questions']").getAttribute("data-question-id");
 
-                if (questionId) {
-                    try {
-                        const response = await fetch(`/Admin/Exam/DeleteQuestion?questionId=${questionId}`, {
-                            method: "DELETE",
-                            headers: { "Content-Type": "application/json" }
-                        });
-                        if (!response.ok) throw new Error("Failed to delete question");
-                        console.log("Question deleted successfully");
-                    } catch (error) {
-                        console.error("Error deleting question:", error);
-                        return;
-                    }
-                }
-                row.remove();
-            };
+				if (questionId) {
+					try {
+						const response = await fetch(`/Admin/Exam/DeleteQuestion?questionId=${questionId}`, {
+							method: "DELETE",
+							headers: { "Content-Type": "application/json" }
+						});
+						if (!response.ok) throw new Error("Failed to delete question");
+						console.log("Question deleted successfully");
+					} catch (error) {
+						console.error("Error deleting question:", error);
+						return;
+					}
+				}
+				row.remove();
+			};
 
-            
-            document.querySelectorAll(".btn-remove-question").forEach(btn => {
-                btn.addEventListener("click", removeQuestionHandler);
-            });
-        });
-    </script>
+
+			document.querySelectorAll(".btn-remove-question").forEach(btn => {
+				btn.addEventListener("click", removeQuestionHandler);
+			});
+		});
+	</script>
 }

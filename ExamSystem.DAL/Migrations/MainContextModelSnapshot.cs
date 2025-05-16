@@ -109,7 +109,6 @@ namespace ExamSystem.DAL.Migrations
                         .HasColumnType("nvarchar(300)");
 
                     b.Property<string>("UserId")
-                        .IsRequired()
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
 
@@ -225,7 +224,6 @@ namespace ExamSystem.DAL.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("UserId")
-                        .IsRequired()
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
 
@@ -392,8 +390,7 @@ namespace ExamSystem.DAL.Migrations
                     b.HasOne("ExamSystem.DAL.Identity.ApplicationUser", null)
                         .WithMany("Exams")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("ExamSystem.Domains.TbQuestions", b =>
@@ -431,8 +428,7 @@ namespace ExamSystem.DAL.Migrations
                     b.HasOne("ExamSystem.DAL.Identity.ApplicationUser", null)
                         .WithMany("UserExams")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

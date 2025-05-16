@@ -49,7 +49,7 @@ namespace ExamSystem.App
 
             app.MapControllerRoute(
                 name: "default",
-                pattern: "{controller=Account}/{action=Index}/{id?}")
+                pattern: "{controller=Account}/{action=Login}/{id?}")
                 .WithStaticAssets();
 
             app.Run();

@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using ExamSystem.App.Models;
+using ExamSystem.BL;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,27 +9,17 @@ namespace ExamSystem.App.Controllers
     [Authorize]
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly IExamService _examService;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(IExamService examService)
         {
-            _logger = logger;
+            _examService = examService;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View();
-        }
-
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            var allExams = await _examService.GetAllExams();
+            return View(allExams.ToList());
         }
     }
 }

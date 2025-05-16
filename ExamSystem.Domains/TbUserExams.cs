@@ -16,7 +16,7 @@ namespace ExamSystem.Domains
         public int TotalQuestions { get; set; }
         public int CorrectAnswers { get; set; }
         public double Score { get; set; }
-        public string UserId { get; set; } = null!;
+        public string? UserId { get; set; } = null!;
         public ICollection<TbUserAnswers> UserAnswers { get; set; }
     }
 }

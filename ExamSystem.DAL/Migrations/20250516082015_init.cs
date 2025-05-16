@@ -164,7 +164,7 @@ namespace ExamSystem.DAL.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false)
+                    UserId = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -189,7 +189,7 @@ namespace ExamSystem.DAL.Migrations
                     TotalQuestions = table.Column<int>(type: "int", nullable: false),
                     CorrectAnswers = table.Column<int>(type: "int", nullable: false),
                     Score = table.Column<double>(type: "float", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false)
+                    UserId = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: true)
                 },
                 constraints: table =>
                 {
