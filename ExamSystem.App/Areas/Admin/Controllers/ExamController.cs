@@ -34,7 +34,19 @@ namespace ExamSystem.App.Areas.Admin.Controllers
             ExamListViewModel examListViewModel = new ExamListViewModel()
             {
                 ExamViewModel = new ExamViewModel(),
-                ExamViewModelList = allExamViewModels
+                ExamViewModelList = allExamViewModels,
+                QuestionViewModelList = allExams.AsQueryable()
+                                                .SelectMany(e => e.Questions)
+                                                .Select(q => new QuestionViewModel()
+                {
+                    QuestionId = q.Id,
+                    QuestionTitle = q.Title,
+                    FirstChoice = q.FirstChoice,
+                    SecondChoice = q.SecondChoice,
+                    ThirdChoice = q.ThirdChoice,
+                    FourthChoice = q.FourthChoice,
+                    CorrectChoice = q.CorrectChoice
+                }).ToList()
             };
 
             return View(examListViewModel);
@@ -97,8 +109,7 @@ namespace ExamSystem.App.Areas.Admin.Controllers
         {
             if(!ModelState.IsValid)
             {
-                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-                return BadRequest(new { success = false, message = "Invalid data provided.", errors = errors });
+                return BadRequest(new { success = false, message = "Invalid data provided."});
             }
 
             if(examViewModel?.Id > 0)
@@ -123,7 +134,26 @@ namespace ExamSystem.App.Areas.Admin.Controllers
             ApplicationUser currentUser = await _userManager.GetUserAsync(User);
             newExam.UserId = currentUser.Id;
 
-            bool saveResult = await _examService.SaveNew(newExam);
+            List<TbQuestions> examQuestions = null;
+            if (examViewModel.Questions?.Count > 0)
+            {
+                examQuestions = new List<TbQuestions>();
+
+                foreach(var question in examViewModel.Questions)
+                {
+                    examQuestions.Add(new TbQuestions()
+                    {
+                        CorrectChoice = question.CorrectChoice,
+                        Title = question.QuestionTitle,
+                        FirstChoice = question.FirstChoice,
+                        SecondChoice = question.SecondChoice,
+                        ThirdChoice = question.ThirdChoice,
+                        FourthChoice = question.FourthChoice
+                    });
+                }
+            }
+
+            bool saveResult = await _examService.SaveNew(newExam, examQuestions);
 
             if(!saveResult)
             {
@@ -132,5 +162,47 @@ namespace ExamSystem.App.Areas.Admin.Controllers
 
             return Ok(new { success = true, message = "Exam updated successfully." });
         }
+
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> SaveQuestionAjax([FromBody] QuestionViewModel questionViewModel)
+        //{
+        //    if (!ModelState.IsValid)
+        //    {
+        //        var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+        //        return BadRequest(new { success = false, message = "Invalid data provided.", errors = errors });
+        //    }
+
+        //    if (examViewModel?.Id > 0)
+        //    {
+        //        var exam = await _examService.GetExamBasedOnId((int)examViewModel.Id);
+
+        //        exam.Title = examViewModel.Title;
+
+        //        if (!await _examService.SaveUpdate(exam))
+        //        {
+        //            return BadRequest(new { success = false, message = "Failed to save the exam.", errors = new[] { "An error occurred while saving the exam. Please report this to customer support" } });
+        //        }
+
+        //        return Ok(new { success = true, message = "Exam updated successfully." });
+        //    }
+
+        //    TbExams newExam = new TbExams()
+        //    {
+        //        Title = examViewModel.Title
+        //    };
+
+        //    ApplicationUser currentUser = await _userManager.GetUserAsync(User);
+        //    newExam.UserId = currentUser.Id;
+
+        //    bool saveResult = await _examService.SaveNew(newExam);
+
+        //    if (!saveResult)
+        //    {
+        //        return BadRequest(new { success = false, message = "Failed to save the exam.", errors = new[] { "An error occurred while saving the exam. Please report this to customer support" } });
+        //    }
+
+        //    return Ok(new { success = true, message = "Exam updated successfully." });
+        //}
     }
 }

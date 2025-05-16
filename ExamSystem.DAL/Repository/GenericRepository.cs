@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Linq.Expressions;
 using ExamSystem.DAL.Context;
 using Microsoft.EntityFrameworkCore;
 
@@ -54,6 +55,16 @@ namespace ExamSystem.DAL.Repository
         }
 
         public async Task<IEnumerable<T>> GetAllAsync() => await _DbSet.ToListAsync();
+
+        public async Task<IEnumerable<T>> GetAllWithIncludeAsync(params Expression<Func<T, object>>[] includes)
+        {
+            IQueryable<T> query = _DbSet;
+            foreach (var include in includes)
+            {
+                query = query.Include(include);
+            }
+            return await query.ToListAsync();
+        }
 
         public async Task<T> GetByIdAsync(int id)
         {

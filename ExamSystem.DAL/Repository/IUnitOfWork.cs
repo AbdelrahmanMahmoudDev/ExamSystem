@@ -10,5 +10,8 @@ namespace ExamSystem.DAL.Repository
         IRepository<TbUserExams> UserExams { get; }
 
         Task<int> SaveAsync();
+        Task BeginTransactionAsync(); 
+        Task CommitTransactionAsync(); 
+        Task RollbackTransactionAsync();
     }
 }

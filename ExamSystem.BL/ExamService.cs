@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,11 +18,39 @@ namespace ExamSystem.BL
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<bool> SaveNew(TbExams newExam)
+        public async Task<bool> SaveNew(TbExams newExam, List<TbQuestions> examQuestions = null)
         {
             if (newExam is null)
             {
                 throw new ArgumentException(nameof(newExam));
+            }
+            if(examQuestions?.Count > 0)
+            {
+                try
+                {
+                    newExam.CreatedDate = DateTime.Now;
+                    newExam.Questions = examQuestions;
+
+                    await _unitOfWork.BeginTransactionAsync();
+                    await _unitOfWork.Exams.AddAsync(newExam);
+
+                    foreach (var question in examQuestions)
+                    {
+                        question.Exam = newExam;
+                        question.CreatedDate = DateTime.Now;
+                        await _unitOfWork.Questions.AddAsync(question);
+                    }
+
+                    await _unitOfWork.SaveAsync();
+                    await _unitOfWork.CommitTransactionAsync();
+                    return true;
+                }
+                catch(Exception e)
+                {
+                    Debug.WriteLine($"Transaction stopped due to: {e.Message}");
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return false;
+                }
             }
             try
             {
@@ -58,7 +87,7 @@ namespace ExamSystem.BL
 
         public async Task<IEnumerable<TbExams>> GetAllExams()
         {
-            return await _unitOfWork.Exams.GetAllAsync();
+            return await _unitOfWork.Exams.GetAllWithIncludeAsync(e => e.Questions);
         }
 
         public async Task<TbExams> GetExamBasedOnId(int id)
