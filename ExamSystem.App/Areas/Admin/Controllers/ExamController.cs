@@ -14,195 +14,111 @@ namespace ExamSystem.App.Areas.Admin.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IExamService _examService;
+        private readonly IQuestionService _questionService;
 
-        public ExamController(UserManager<ApplicationUser> userManager, IExamService examService)
+        public ExamController(UserManager<ApplicationUser> userManager, IExamService examService, IQuestionService questionService)
         {
             _userManager = userManager;
             _examService = examService;
+            _questionService = questionService;
         }
 
         public async Task<IActionResult> Index()
         {
             IEnumerable<TbExams> allExams = await _examService.GetAllExams();
+            return View(allExams.ToList());
+        }
 
-            IEnumerable<ExamViewModel> allExamViewModels = allExams.Select(e => new ExamViewModel()
+        [HttpGet]
+        public async Task<IActionResult> Edit(int? Id)
+        {
+            ExamViewModel examViewModel = new ExamViewModel();
+            if (Id is not null)
             {
-                Id = e.Id,
-                Title = e.Title
-            });
+                TbExams targetExam = await _examService.GetExamBasedOnId((int)Id);
 
-            ExamListViewModel examListViewModel = new ExamListViewModel()
-            {
-                ExamViewModel = new ExamViewModel(),
-                ExamViewModelList = allExamViewModels,
-                QuestionViewModelList = allExams.AsQueryable()
-                                                .SelectMany(e => e.Questions)
-                                                .Select(q => new QuestionViewModel()
+                examViewModel.Id = targetExam.Id;
+                examViewModel.Title = targetExam.Title;
+                examViewModel.Questions = targetExam.Questions.Select(s => new QuestionViewModel()
                 {
-                    QuestionId = q.Id,
-                    QuestionTitle = q.Title,
-                    FirstChoice = q.FirstChoice,
-                    SecondChoice = q.SecondChoice,
-                    ThirdChoice = q.ThirdChoice,
-                    FourthChoice = q.FourthChoice,
-                    CorrectChoice = q.CorrectChoice
-                }).ToList()
-            };
+                    CorrectChoice = s.CorrectChoice,
+                    QuestionTitle = s.Title,
+                    FirstChoice = s.FirstChoice,
+                    SecondChoice = s.SecondChoice,
+                    ThirdChoice = s.ThirdChoice,
+                    FourthChoice = s.FourthChoice
+                }).ToList();
 
-            return View(examListViewModel);
-        }
-
-        [HttpGet]
-        [Route("GetAllExamsAjax/")]
-        public async Task<IActionResult> GetAllExamsAjax()
-        {
-            var allExams = await _examService.GetAllExams();
-
-            return Ok(allExams.Select(e => new
-            {
-                id = e.Id,
-                title = e.Title,
-            }));
-        }
-
-        [HttpGet]
-        [Route("GetExamAjax/{id}")]
-        public async Task<IActionResult> GetExamAjax(int id)
-        {
-            var exam = await _examService.GetExamBasedOnId(id);
-            
-
-            if (exam.Id == 0)
-            {
-                return NotFound(new { success = false, message = "Exam not found." });
+                return View("Edit", examViewModel);
             }
-
-            return Ok(new
-            {
-                id = exam.Id,
-                title = exam.Title,
-            });
-        }
-
-        [HttpGet]
-        [Route("DeleteExamAjax/{id}")]
-        public async Task<IActionResult> DeleteExamAjax(int id)
-        {
-            var exam = await _examService.GetExamBasedOnId(id);
-
-            if (exam.Id == 0)
-            {
-                return NotFound(new { success = false, message = "Exam not found." });
-            }
-
-            if(! await _examService.DeleteExam(exam))
-            {
-                return BadRequest(new { success = false, message = "Failed to delete the exam.", errors = new[] { "An error occurred while saving the exam. Please report this to customer support" } });
-            }
-
-            return Ok(new { success = true, message = "Exam deleted successfully." });
+            return View("Edit", examViewModel);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> EditAjax([FromBody] ExamViewModel examViewModel)
+        public async Task<IActionResult> Save(ExamViewModel examViewModel)
         {
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                return BadRequest(new { success = false, message = "Invalid data provided."});
+                return View("Edit", examViewModel);
             }
 
-            if(examViewModel?.Id > 0)
-            {
-                var exam = await _examService.GetExamBasedOnId((int)examViewModel.Id);
-
-                exam.Title = examViewModel.Title;
-
-                if(!await _examService.SaveUpdate(exam))
-                {
-                    return BadRequest(new { success = false, message = "Failed to save the exam.", errors = new[] { "An error occurred while saving the exam. Please report this to customer support" } });
-                }
-
-                return Ok(new { success = true, message = "Exam updated successfully." });
-            }
-
+            bool IsSuccess = false;
             TbExams newExam = new TbExams()
             {
-                Title = examViewModel.Title
+                Id = examViewModel.Id,
+                Title = examViewModel.Title,
+                Questions = examViewModel.Questions.Select(s => new TbQuestions()
+                {
+                    CorrectChoice = s.CorrectChoice,
+                    Title = s.QuestionTitle,
+                    FirstChoice = s.FirstChoice,
+                    SecondChoice = s.SecondChoice,
+                    ThirdChoice = s.ThirdChoice,
+                    FourthChoice = s.FourthChoice
+                }).ToList()
             };
 
             ApplicationUser currentUser = await _userManager.GetUserAsync(User);
             newExam.UserId = currentUser.Id;
 
-            List<TbQuestions> examQuestions = null;
-            if (examViewModel.Questions?.Count > 0)
-            {
-                examQuestions = new List<TbQuestions>();
+            if (newExam.Id == 0)
+                IsSuccess = await _examService.SaveNew(newExam);
+            else
+                IsSuccess = await _examService.SaveUpdate(newExam);
 
-                foreach(var question in examViewModel.Questions)
-                {
-                    examQuestions.Add(new TbQuestions()
-                    {
-                        CorrectChoice = question.CorrectChoice,
-                        Title = question.QuestionTitle,
-                        FirstChoice = question.FirstChoice,
-                        SecondChoice = question.SecondChoice,
-                        ThirdChoice = question.ThirdChoice,
-                        FourthChoice = question.FourthChoice
-                    });
-                }
-            }
+            if (!IsSuccess)
+                return StatusCode(500, "A server side error occured while processing your request");
 
-            bool saveResult = await _examService.SaveNew(newExam, examQuestions);
-
-            if(!saveResult)
-            {
-                return BadRequest(new { success = false, message = "Failed to save the exam.", errors = new[] { "An error occurred while saving the exam. Please report this to customer support" } });
-            }
-
-            return Ok(new { success = true, message = "Exam updated successfully." });
+            return RedirectToAction("Index");
         }
 
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> SaveQuestionAjax([FromBody] QuestionViewModel questionViewModel)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-        //        return BadRequest(new { success = false, message = "Invalid data provided.", errors = errors });
-        //    }
+        [HttpDelete]
+        [Area("Admin")]
+        [Route("Admin/Exam/DeleteQuestion")]
+        public async Task<IActionResult> DeleteQuestion(int questionId)
+        {
+            if (questionId <= 0) return BadRequest("Invalid question ID");
 
-        //    if (examViewModel?.Id > 0)
-        //    {
-        //        var exam = await _examService.GetExamBasedOnId((int)examViewModel.Id);
+            try
+            {
+                await _questionService.RemoveQuestion(questionId);
+                return Ok();
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Error deleting question");
+            }
+        }
 
-        //        exam.Title = examViewModel.Title;
-
-        //        if (!await _examService.SaveUpdate(exam))
-        //        {
-        //            return BadRequest(new { success = false, message = "Failed to save the exam.", errors = new[] { "An error occurred while saving the exam. Please report this to customer support" } });
-        //        }
-
-        //        return Ok(new { success = true, message = "Exam updated successfully." });
-        //    }
-
-        //    TbExams newExam = new TbExams()
-        //    {
-        //        Title = examViewModel.Title
-        //    };
-
-        //    ApplicationUser currentUser = await _userManager.GetUserAsync(User);
-        //    newExam.UserId = currentUser.Id;
-
-        //    bool saveResult = await _examService.SaveNew(newExam);
-
-        //    if (!saveResult)
-        //    {
-        //        return BadRequest(new { success = false, message = "Failed to save the exam.", errors = new[] { "An error occurred while saving the exam. Please report this to customer support" } });
-        //    }
-
-        //    return Ok(new { success = true, message = "Exam updated successfully." });
-        //}
+        public async Task<IActionResult> Delete(int id)
+        {
+            TbExams targetExam = await _examService.GetExamBasedOnId(id);
+            if (!await _examService.DeleteExam(targetExam))
+            {
+                return StatusCode(500, "Error deleting question");
+            }
+            return RedirectToAction("Index");
+        }
     }
 }

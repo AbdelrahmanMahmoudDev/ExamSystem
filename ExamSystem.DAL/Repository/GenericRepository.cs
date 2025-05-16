@@ -66,6 +66,30 @@ namespace ExamSystem.DAL.Repository
             return await query.ToListAsync();
         }
 
+        public async Task<T> GetByIdWithIncludeAsync(int id, params Expression<Func<T, object>>[] includes)
+        {
+            if (id < 0)
+            {
+                throw new InvalidOperationException($"This Id: {id} is invalid");
+            }
+            IQueryable<T> query = _DbSet;
+            foreach (var include in includes)
+            {
+                query = query.Include(include);
+            }
+
+            try
+            {
+                return query.ToList().FirstOrDefault(e => e.GetType().GetProperty("Id").GetValue(e, null).Equals(id));
+                //return await query.FindAsync(id);
+            }
+            catch (Exception E)
+            {
+                Debug.WriteLine(E.Message);
+                throw;
+            }
+        }
+
         public async Task<T> GetByIdAsync(int id)
         {
             if (id < 0)

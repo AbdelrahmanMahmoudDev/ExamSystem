@@ -36,7 +36,8 @@ namespace ExamSystem.DAL.Context
 
                 e.HasOne(e => e.Exam)
                  .WithMany(e => e.Questions)
-                 .HasForeignKey(e => e.ExamId);
+                 .HasForeignKey(e => e.ExamId)
+                 .OnDelete(DeleteBehavior.Cascade);
             });
 
             builder.Entity<TbUserExams>(e =>

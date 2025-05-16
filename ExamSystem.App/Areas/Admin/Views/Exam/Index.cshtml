@@ -1,63 +1,11 @@
-﻿@model ExamListViewModel
+﻿@model List<TbExams>
 
 <div class="container">
 	<div class="row">
 		<div class="col">
-			<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModalToggle">
-				Create Exam
-			</button>
+			<a asp-controller="Exam" asp-action="Edit" class="btn btn-primary">Create Exam</a>
 		</div>
 	</div>
-	<div class="modal fade modal-dialog-scrollable" id="exampleModalToggle" aria-hidden="true" role="dialog" aria-labelledby="exampleModalToggleLabel" tabindex="-1" style="--bs-modal-width: 1000px !important;">
-		<div class="modal-dialog modal-dialog-centered">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title" id="exampleModalToggleLabel">Modal 1</h5>
-					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-				</div>
-				<div class="modal-body">
-					<div class="container-fluid">
-						<div class="row">
-							<div class="col">
-								<form method="post">
-									@Html.AntiForgeryToken()
-									@await Html.PartialAsync("_ExamCreateFormPartial", Model.ExamViewModel)
-								</form>
-							</div>
-						</div>
-						<button id="addQuestionBtn" type="button" class="my-2 btn btn-primary" data-bs-target="#exampleModalToggle2" data-bs-toggle="modal" data-bs-dismiss="modal">Add question</button>
-						<partial name="_QuestionListPartial", model="@Model.QuestionViewModelList" />
-					</div>
-				</div>
-				<div class="modal-footer">
-					<button type="submit" id="btnSubmit" class="btn btn-primary">Save</button>
-				</div>
-			</div>
-		</div>
-	</div>
-	<div class="modal fade modal-dialog-scrollable" id="exampleModalToggle2" role="dialog" aria-hidden="true" aria-labelledby="exampleModalToggleLabel2" tabindex="-1" style="min-width: 700px;">
-		<div class="modal-dialog modal-dialog-centered">
-			<div class="modal-content">
-				<div class="modal-header">
-					<h5 class="modal-title" id="exampleModalToggleLabel2">Modal 2</h5>
-					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-				</div>
-				<div class="modal-body">
-					<div class="container-fluid">
-						<div class="row">
-							<div class="col">
-								<partial name="_QuestionFormPartial" model="@Model.QuestionViewModel" />
-							</div>
-						</div>
-					</div>
-				</div>
-				<div class="modal-footer">
-					<button class="btn btn-primary" data-bs-target="#exampleModalToggle" data-bs-toggle="modal" data-bs-dismiss="modal">Back to first</button>
-				</div>
-			</div>
-		</div>
-	</div>
-
 	<div class="row">
 		<div class="col">
 			<table class="table table-striped">
@@ -70,16 +18,16 @@
 					</tr>
 				</thead>
 				<tbody class="table-body">
-					@foreach (var element in Model.ExamViewModelList)
+					@foreach (var element in Model)
 					{
 						<tr>
 							<td>@element.Id</td>
 							<td>@element.Title</td>
 							<td>
-								<a data-bs-toggle="modal" data-bs-target="#exampleModalToggle" class="alert-link btn-edit text-decoration-none text-white btn btn-warning" data-id="@element.Id">Edit</a>
+								<a asp-controller="Exam" asp-action="Edit" class="alert-link btn-edit text-decoration-none text-white btn btn-warning" asp-route-id="@element.Id">Edit</a>
 							</td>
 							<td>
-								<a class="alert-link text-decoration-none text-white btn-delete btn btn-danger" data-id="@element.Id">Delete</a>
+								<a asp-controller="Exam" asp-action="Delete" class="alert-link text-decoration-none text-white btn-delete btn btn-danger" asp-route-id="@element.Id">Delete</a>
 							</td>
 						</tr>
 					}
@@ -91,231 +39,5 @@
 
 @section Scripts
 {
-	<script>
-		document.addEventListener("DOMContentLoaded", () => {
-			let questionsAddedForNewExam = []
-
-			const setupEditBtns = () => {
-				document.querySelectorAll(".btn-edit").forEach(btn => {
-					btn.addEventListener("click", () => {
-						fetch(`/GetExamAjax/${btn.dataset.id}`, {
-							method: "GET",
-						   headers: {
-							   "Content-Type": "application/json",
-						   },
-					   })
-					   .then(response => {
-						   if(!response.ok) {
-							   throw new Error("Failed to fetch exam data");
-						   }
-						   return response.json();
-					   })
-					   .then(data => {
-						   document.getElementById("Id").value= data.id;
-						   document.getElementById("Title").value = data.title;
-
-
-					   })
-					   .catch(error => console.error("error posting data: ", error));
-					});
-				});
-			};
-			const setupDeleteBtns = () => {
-				document.querySelectorAll(".btn-delete").forEach(btn => {
-					btn.addEventListener("click", () => {
-						fetch(`/DeleteExamAjax/${btn.dataset.id}`, {
-						   method: "GET",
-						   headers: {
-							   "Content-Type": "application/json",
-						   },
-					   })
-					   .then(response => {
-						   if(!response.ok) {
-							   throw new Error("Failed to fetch exam data");
-						   }
-						   return response.json();
-					   })
-					   .then(() => {
-							fetch(`/GetAllExamsAjax/`, {
-								method: "GET",
-								headers: {
-									"Content-Type": "application/json"
-								},
-					   })
-							.then(response => {
-								if(!response.ok) {
-									return response.json()
-										   .then(errorData => {
-												throw new Error(errorData.message) || "Failed to update table"});
-						   }
-						   return response.json();
-					   })
-					   .then(exams => {
-						   const tBody = document.querySelector(".table-body");
-						   tBody.innerHTML = null;
-						   exams.forEach(exam => {
-							   const row = document.createElement("tr");
-							   row.innerHTML =
-							   `
-									<td>${exam.id}</td>
-									<td>${exam.title}</td>
-									<td>
-										<a type="button" href="#" data-bs-toggle="modal" data-bs-target="#exampleModalToggle" class="alert-link btn-edit text-decoration-none" data-id="${exam.id}">Edit</a>
-									</td>
-									<td>
-										<a type="button" href="#" class="alert-link text-decoration-none btn-delete" data-id="${exam.id}">Delete</a>
-									</td>
-							   `;
-							   tBody.appendChild(row);
-						   });
-							setupEditBtns();
-							setupDeleteBtns();
-					   })
-				   })
-				   .catch(error => console.error("error posting data: ", error));
-				});
-			});
-			};
-			const attachSaveQuestionBtnEvent = () => {
-				document.getElementById("saveQuestion").addEventListener("click", e => {
-				e.preventDefault();
-
-				const questionId = document.getElementById("QuestionId").value;
-				const questionTitle = document.getElementById("QuestionTitle").value;
-				const questionFirstChoiceText = document.getElementById("FirstChoice").value;
-				const questionSecondChoiceText = document.getElementById("SecondChoice").value;
-				const questionThirdChoiceText = document.getElementById("ThirdChoice").value;
-				const questionFourthChoiceText = document.getElementById("FourthChoice").value;
-				const questionCorrectChoice = document.getElementById("CorrectChoice").value;
-
-				const newQuestion = {
-					QuestionId: questionId ? parseInt(questionId) : null,
-					QuestionTitle: questionTitle,
-					FirstChoiceText: questionFirstChoiceText,
-					SecondChoiceText: questionSecondChoiceText,
-					ThirdChoiceText: questionThirdChoiceText,
-					FourthChoiceText: questionFourthChoiceText,
-					QuestionCorrectChoice: questionCorrectChoice,
-				};
-
-				questionsAddedForNewExam.push(newQuestion);
-
-				const questionTable = document.querySelector(".question-table-body");
-
-				const questionRow = document.createElement("tr");
-				questionRow.innerHTML =
-				`
-					<td>${questionId ? questionId : questionsAddedForNewExam.length}</td>
-					<td>${questionTitle}</td>
-					<td>${questionCorrectChoice}</td>
-					<td>${questionFirstChoiceText}</td>
-					<td>${questionSecondChoiceText}</td>
-					<td>${questionThirdChoiceText}</td>
-					<td>${questionFourthChoiceText}</td>
-					<td><a type="button" href="#" class="alert-link text-decoration-none btn-edit" data-id="${questionId}">Edit</a></td>
-					<td><a type="button" href="#" class="alert-link text-decoration-none btn-delete" data-id="${questionId}">Delete</a></td>
-				`;
-
-				questionTable.appendChild(questionRow);
-
-				document.getElementById("QuestionTitle").value = "";
-				document.getElementById("FirstChoice").value = "";
-				document.getElementById("SecondChoice").value = "";
-				document.getElementById("ThirdChoice").value = "";
-				document.getElementById("FourthChoice").value = "";
-				document.getElementById("CorrectChoice").value = 1;
-
-			});
-			}
-
-			setupEditBtns();
-			setupDeleteBtns();
-			attachSaveQuestionBtnEvent();
-
-		   document.getElementById("btnSubmit").addEventListener("click", e => {
-			   e.preventDefault();
-			   const examId = document.getElementById("Id").value;
-			   const examTitle = document.getElementById("Title").value;
-
-				   let payload = {
-					   Id: examId ? parseInt(examId) : null,
-					   Title: examTitle,
-				   };
-
-				   if(questionsAddedForNewExam.length > 0) {
-					   payload.Questions = questionsAddedForNewExam.map(question => ({
-						   QuestionId: question.QuestionId ? parseInt(question.QuestionId) : null,
-						   QuestionTitle: question.QuestionTitle,
-						   FirstChoice: question.FirstChoiceText,
-						   SecondChoice: question.SecondChoiceText,
-						   ThirdChoice: question.ThirdChoiceText,
-						   FourthChoice: question.FourthChoiceText,
-						   CorrectChoice: question.QuestionCorrectChoice,
-					   }));
-				   }
-
-				   const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
-
-				   fetch('@Url.Action("EditAjax", "Exam")', {
-					   method: "POST",
-					   headers: {
-						   "Content-Type": "application/json",
-						   "RequestVerificationToken": token
-					   },
-					   body: JSON.stringify(payload)
-				   })
-				   .then(response => {
-					   if(!response.ok) {
-						   return response.json().then(errorData => {throw new Error(errorData.message) || "Failed to update exam"});
-					   }
-					   return response.json();
-				   })
-				   .then(() => {
-					   fetch(`/GetAllExamsAjax/`, {
-						   method: "GET",
-						   headers: {
-							   "Content-Type": "application/json"
-						   },
-					   })
-					   .then(response => {
-						   if(!response.ok) {
-							   return response.json().then(errorData => {
-								   throw new Error(errorData.message) || "Failed to update table"});
-						   }
-						   return response.json();
-					   })
-					   .then(exams => {
-						   const tBody = document.querySelector(".table-body");
-						   console.log(tBody);
-						   tBody.innerHTML = null;
-						   exams.forEach(exam => {
-							   console.log(exam);
-							   const row = document.createElement("tr");
-							   row.innerHTML =
-							   `
-									<td>${exam.id}</td>
-									<td>${exam.title}</td>
-									<td>
-										<a type="button" href="#" data-bs-toggle="modal" data-bs-target="#exampleModalToggle" class="alert-link btn-edit text-decoration-none" data-id="${exam.id}">Edit</a>
-									</td>
-									<td>
-										<a type="button" href="#" class="alert-link text-decoration-none btn-delete" data-id="${exam.id}">Delete</a>
-									</td>
-							   `;
-							   tBody.appendChild(row);
-						   });
-
-						   setupEditBtns();
-						   setupDeleteBtns();
-						   attachSaveQuestionBtnEvent();
-					   })
-				   })
-				   .catch(error => console.error("error posting data: ", error));
-
-		   });
-		});
-	</script>
-
 	<partial name="_ValidationScriptsPartial" />
-
 }

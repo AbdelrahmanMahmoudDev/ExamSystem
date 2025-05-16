@@ -18,23 +18,22 @@ namespace ExamSystem.BL
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<bool> SaveNew(TbExams newExam, List<TbQuestions> examQuestions = null)
+        public async Task<bool> SaveNew(TbExams newExam)
         {
             if (newExam is null)
             {
                 throw new ArgumentException(nameof(newExam));
             }
-            if(examQuestions?.Count > 0)
+            if(newExam.Questions?.Count > 0)
             {
                 try
                 {
                     newExam.CreatedDate = DateTime.Now;
-                    newExam.Questions = examQuestions;
 
                     await _unitOfWork.BeginTransactionAsync();
                     await _unitOfWork.Exams.AddAsync(newExam);
 
-                    foreach (var question in examQuestions)
+                    foreach (var question in newExam.Questions)
                     {
                         question.Exam = newExam;
                         question.CreatedDate = DateTime.Now;
@@ -75,12 +74,21 @@ namespace ExamSystem.BL
 
             try
             {
+                await _unitOfWork.BeginTransactionAsync();
                 _unitOfWork.Exams.Update(exam);
+                foreach(var question in exam.Questions)
+                {
+                    question.Exam = exam;
+                    question.CreatedDate = DateTime.Now;
+                    _unitOfWork.Questions.Update(question);
+                }
                 await _unitOfWork.SaveAsync();
+                await _unitOfWork.CommitTransactionAsync();
                 return true;
             }
             catch
             {
+                await _unitOfWork.RollbackTransactionAsync();
                 return false;
             }
         }
@@ -92,7 +100,7 @@ namespace ExamSystem.BL
 
         public async Task<TbExams> GetExamBasedOnId(int id)
         {
-            TbExams targetExam = await _unitOfWork.Exams.GetByIdAsync(id);
+            TbExams targetExam = await _unitOfWork.Exams.GetByIdWithIncludeAsync(id, a => a.Questions);
 
             if(targetExam == null)
             {

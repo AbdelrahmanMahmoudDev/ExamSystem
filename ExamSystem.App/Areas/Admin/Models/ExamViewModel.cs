@@ -6,7 +6,7 @@ namespace ExamSystem.App.Areas.Admin.Models
 {
     public class ExamViewModel
     {
-        public int? Id { get; set; }
+        public int Id { get; set; }
 
         [Required(ErrorMessage = "The exam title is required.")]
         [StringLength(50, MinimumLength = 3, ErrorMessage = "The exam title must be atleast 3 characters long.")]
