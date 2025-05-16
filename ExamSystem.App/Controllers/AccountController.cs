@@ -28,7 +28,7 @@ namespace ExamSystem.App.Controllers
             return View(registerViewModel);
         }
 
-        [HttpPost]  
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel userViewModel)
         {
@@ -56,7 +56,15 @@ namespace ExamSystem.App.Controllers
                 }
 
                 await _signInManager.SignInAsync(applicationUser, userViewModel.IsRememberMe);
-                return RedirectToAction("Index", "Home");
+
+                if (await _userManager.IsInRoleAsync(applicationUser, "Admin"))
+                {
+                    return RedirectToAction("Index", "Exam", new { area = "Admin" });
+                }
+                else
+                {
+                    return RedirectToAction("Index", "Home");
+                }
             }
 
             foreach (var error in userCreationResult.Errors)
@@ -86,7 +94,16 @@ namespace ExamSystem.App.Controllers
 
             if (signInResult.Succeeded)
             {
-                return RedirectToAction("Index", "Home");
+                var user = await _userManager.FindByNameAsync(userViewModel.UserName);
+
+                if (await _userManager.IsInRoleAsync(user, "Admin"))
+                {
+                    return RedirectToAction("Index", "Exam", new { area = "Admin" });
+                }
+                else
+                {
+                    return RedirectToAction("Index", "Home");
+                }
             }
 
             ModelState.AddModelError(string.Empty, "Invalid login attempt. Please check your username and password.");

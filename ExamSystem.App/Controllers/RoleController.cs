@@ -11,7 +11,7 @@ namespace ExamSystem.App.Controllers
 
         public RoleController(RoleManager<IdentityRole> roleManager)
         {
-            _roleManager = roleManager;
+            _roleManager = roleManager; 
         }
 
         [HttpGet]

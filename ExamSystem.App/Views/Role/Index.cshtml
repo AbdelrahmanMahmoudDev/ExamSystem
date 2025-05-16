@@ -1,19 +1,21 @@
 ﻿@model RoleViewModel
 
-<div class="tab-content">
-	<div class="tab-pane fade show active" id="pills-login" role="tabpanel" aria-labelledby="tab-login">
-		<form method="post" asp-controller="Role" asp-action="SaveRole">
-			@Html.AntiForgeryToken()
-			<!-- Username input -->
-			<div data-mdb-input-init class="form-outline mb-4">
-				<input asp-for="RoleName" type="text" class="form-control" />
-				<label asp-for="RoleName" class="form-label">Role *</label>
-				<span asp-validation-for="RoleName" style="color: red;"></span>
-			</div>
+<div class="container my-5 d-flex justify-content-center align-items-center">
+	<div class="tab-content">
+		<div class="tab-pane fade show active" id="pills-login" role="tabpanel" aria-labelledby="tab-login">
+			<form method="post" asp-controller="Role" asp-action="SaveRole">
+				@Html.AntiForgeryToken()
+				<!-- Username input -->
+				<div data-mdb-input-init class="form-outline mb-4">
+					<input asp-for="RoleName" type="text" class="form-control" />
+					<label asp-for="RoleName" class="form-label">Role *</label>
+					<span asp-validation-for="RoleName" style="color: red;"></span>
+				</div>
 
-			<!-- Submit button -->
-			<button type="submit" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-block mb-4">Add Role</button>
-		</form>
+				<!-- Submit button -->
+				<button type="submit" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-block mb-4">Add Role</button>
+			</form>
+		</div>
 	</div>
 </div>
 

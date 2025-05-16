@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ExamSystem.App.Controllers
 {
 }
-[Authorize]
+[Authorize(Roles = "User")]
 public class HomeController : Controller
 {
     private readonly IExamService _examService;
