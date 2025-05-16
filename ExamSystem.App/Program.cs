@@ -2,6 +2,7 @@ using ExamSystem.BL;
 using ExamSystem.DAL.Context;
 using ExamSystem.DAL.Identity;
 using ExamSystem.DAL.Repository;
+using ExamSystem.DAL.Utilities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,7 +10,7 @@ namespace ExamSystem.App
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public async static Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -17,7 +18,8 @@ namespace ExamSystem.App
             builder.Services.AddControllersWithViews();
             builder.Services.AddDbContext<MainContext>(options =>
             {
-                options.UseSqlServer(builder.Configuration.GetConnectionString("cs"));
+                options.UseInMemoryDatabase("ExamSystemDb");
+                //options.UseSqlServer(builder.Configuration.GetConnectionString("cs"));
             });
 
 
@@ -30,6 +32,22 @@ namespace ExamSystem.App
             builder.Services.AddScoped<IUserExamService, UserExamService>();
 
             var app = builder.Build();
+
+            // I added this for simplicity
+            // It works well with either an in-memory database or a SQL Server database
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                try
+                {
+                    await DataSeeder.SeedUsersAndRoles(services);
+                    Console.WriteLine("Data seeding successful!");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error seeding data: {ex.Message}");
+                }
+            }
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())

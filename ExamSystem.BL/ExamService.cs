@@ -30,7 +30,6 @@ namespace ExamSystem.BL
                 {
                     newExam.CreatedDate = DateTime.Now;
 
-                    await _unitOfWork.BeginTransactionAsync();
                     await _unitOfWork.Exams.AddAsync(newExam);
 
                     foreach (var question in newExam.Questions)
@@ -41,13 +40,11 @@ namespace ExamSystem.BL
                     }
 
                     await _unitOfWork.SaveAsync();
-                    await _unitOfWork.CommitTransactionAsync();
                     return true;
                 }
                 catch(Exception e)
                 {
                     Debug.WriteLine($"Transaction stopped due to: {e.Message}");
-                    await _unitOfWork.RollbackTransactionAsync();
                     return false;
                 }
             }
@@ -74,7 +71,6 @@ namespace ExamSystem.BL
 
             try
             {
-                await _unitOfWork.BeginTransactionAsync();
                 _unitOfWork.Exams.Update(exam);
                 foreach(var question in exam.Questions)
                 {
@@ -83,12 +79,10 @@ namespace ExamSystem.BL
                     _unitOfWork.Questions.Update(question);
                 }
                 await _unitOfWork.SaveAsync();
-                await _unitOfWork.CommitTransactionAsync();
                 return true;
             }
             catch
             {
-                await _unitOfWork.RollbackTransactionAsync();
                 return false;
             }
         }

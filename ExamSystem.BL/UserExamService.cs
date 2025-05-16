@@ -65,15 +65,12 @@ namespace ExamSystem.BL
 
             try
             {
-               await _unitOfWork.BeginTransactionAsync();
                await _unitOfWork.UserExams.AddAsync(userExamAttempt);
                await _unitOfWork.SaveAsync();
-               await _unitOfWork.CommitTransactionAsync();
             }
             catch(Exception e)
             {
                 Debug.WriteLine(e.Message);
-                await _unitOfWork.RollbackTransactionAsync();
             }
 
             return new Tuple<double, int, int, bool>(score, correctAnswers, incorrectAnswers, passStatus);
